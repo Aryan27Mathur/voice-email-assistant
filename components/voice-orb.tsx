@@ -12,6 +12,7 @@ export function VoiceOrb({ status, onClick }: VoiceOrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>(0)
   const timeRef = useRef(0)
+  const drawRef = useRef<(ctx: CanvasRenderingContext2D, width: number, height: number) => void>(null!)
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -186,11 +187,15 @@ export function VoiceOrb({ status, onClick }: VoiceOrbProps) {
       }
 
       animationRef.current = requestAnimationFrame(() =>
-        draw(ctx, width, height)
+        drawRef.current(ctx, width, height)
       )
     },
     [status]
   )
+
+  useEffect(() => {
+    drawRef.current = draw
+  }, [draw])
 
   useEffect(() => {
     const canvas = canvasRef.current

@@ -89,6 +89,104 @@
   }
 }
 
+/* Email HTML body rendering — force dark mode over inline styles */
+.email-body {
+  color-scheme: dark;
+}
+.email-body,
+.email-body div,
+.email-body td,
+.email-body th,
+.email-body p,
+.email-body span,
+.email-body li {
+  color: hsl(var(--foreground) / 0.85) !important;
+  background-color: transparent !important;
+}
+.email-body table,
+.email-body tr,
+.email-body tbody,
+.email-body thead {
+  background-color: transparent !important;
+}
+.email-body p {
+  margin-bottom: 0.75em;
+}
+.email-body a {
+  color: hsl(var(--primary)) !important;
+  text-decoration: underline;
+}
+.email-body a:hover {
+  opacity: 0.8;
+}
+.email-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+}
+.email-body ul,
+.email-body ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+.email-body li {
+  margin-bottom: 0.25em;
+}
+.email-body h1,
+.email-body h2,
+.email-body h3,
+.email-body h4,
+.email-body h5,
+.email-body h6 {
+  font-weight: 600;
+  margin-bottom: 0.5em;
+  margin-top: 1em;
+  color: hsl(var(--foreground)) !important;
+}
+.email-body h1 {
+  font-size: 1.25em;
+}
+.email-body h2 {
+  font-size: 1.125em;
+}
+.email-body h3 {
+  font-size: 1em;
+}
+.email-body blockquote {
+  border-left: 3px solid hsl(var(--border));
+  padding-left: 1em;
+  margin: 0.75em 0;
+  color: hsl(var(--muted-foreground)) !important;
+}
+.email-body pre {
+  background: hsl(var(--secondary)) !important;
+  padding: 0.75em;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+}
+.email-body code {
+  background: hsl(var(--secondary)) !important;
+  padding: 0.125em 0.25em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+.email-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+}
+.email-body td,
+.email-body th {
+  padding: 0.375em 0.5em;
+  border: none !important;
+}
+.email-body hr {
+  border: none !important;
+  border-top: 1px solid hsl(var(--border)) !important;
+  margin: 1em 0;
+}
+
 @keyframes pulse-ring {
   0% {
     transform: scale(1);
