@@ -1,6 +1,7 @@
 """
 MailVox Voice Agent - LiveKit voice assistant for email inbox.
 """
+import json
 import logging
 import os
 
@@ -22,9 +23,14 @@ from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 from tools.email_tools import (
     get_attachment_content,
+    get_current_email_context,
     get_email_content,
+    get_thread_messages,
     list_emails,
+    list_threads,
     search_emails,
+    set_job_grant_id,
+    threads_needing_reply,
 )
 
 logger = logging.getLogger("mailvox-agent")
@@ -36,9 +42,13 @@ Keep responses concise and natural for voice - short sentences, no markdown or b
 Do not use emojis, asterisks, or special formatting.
 
 When answering questions about emails:
+- When the user asks about "this email", "the current one", "the selected email", or "what I'm looking at", first call get_current_email_context to see what they have open. Use that message_id with get_email_content for full details.
 - Use list_emails to find relevant messages (unread, with attachments, or search).
 - Use get_email_content to read a specific email's body.
 - Use get_attachment_content when the user asks about PDF or document contents - you need the message_id and attachment_id from the email.
+- Use threads_needing_reply when the user asks about emails they need to respond to, pending replies, or "what needs my response".
+- Use list_threads for general thread browsing.
+- Use get_thread_messages when the user asks about the contents of an email chain or "what did they say in that thread".
 
 If processing will take a minute or more (e.g. analyzing many attachments), tell the user: "This will take a minute or two. I'll have the answer for you as soon as it's ready." Then provide the reply when done.
 
@@ -49,7 +59,16 @@ class MailVoxAgent(Agent):
     def __init__(self) -> None:
         super().__init__(
             instructions=INSTRUCTIONS,
-            tools=[list_emails, get_email_content, get_attachment_content, search_emails],
+            tools=[
+        list_emails,
+        get_email_content,
+        get_attachment_content,
+        search_emails,
+        get_current_email_context,
+        list_threads,
+        threads_needing_reply,
+        get_thread_messages,
+    ],
         )
 
     async def on_enter(self):
@@ -57,14 +76,14 @@ class MailVoxAgent(Agent):
         # Ask the LLM to check inbox and give a brief - it will use list_emails tool
         try:
             self.session.generate_reply(
-                "The user just connected. First call list_emails with unread=True. "
+                instructions="The user just connected. First call list_emails with unread=True. "
                 "Then give a friendly 15-20 second personalized brief: greeting, unread count, "
                 "and top 2 actionable items. End with 'Would you like me to expand on any of these?'",
                 allow_interruptions=True,
             )
         except Exception as e:
             logger.warning(f"Proactive brief error: {e}")
-            self.session.generate_reply(allow_interruptions=False)
+            self.session.generate_reply()
 
 
 server = AgentServer()
@@ -77,9 +96,20 @@ def prewarm(proc: JobProcess):
 server.setup_fnc = prewarm
 
 
-@server.rtc_session()
+@server.rtc_session(agent_name="mailvox")
 async def entrypoint(ctx: JobContext):
     ctx.log_context_fields = {"room": ctx.room.name}
+
+    # Grant from dispatch metadata - available before user joins (avoids race)
+    if ctx.job and ctx.job.metadata:
+        try:
+            meta = json.loads(ctx.job.metadata)
+            grant_id = meta.get("grant_id", "")
+            if grant_id:
+                set_job_grant_id(grant_id)
+                logger.info(f"Grant from job metadata: {grant_id[:10]}...")
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Could not parse job metadata: {e}")
 
     session = AgentSession(
         stt=inference.STT("deepgram/nova-3", language="multi"),

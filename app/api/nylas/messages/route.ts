@@ -14,6 +14,7 @@ function formatMessage(msg: {
   unread?: boolean
   starred?: boolean
   folders?: string[]
+  threadId?: string
   attachments?: { id: string; filename: string; contentType: string; size?: number }[]
 }): Email {
   const from = msg.from?.[0]
@@ -29,6 +30,7 @@ function formatMessage(msg: {
     read: !msg.unread,
     starred: msg.starred ?? false,
     labels: msg.folders || [],
+    threadId: msg.threadId,
     attachments: (msg.attachments || []).map((a) => ({
       id: a.id,
       filename: a.filename,
@@ -57,12 +59,14 @@ export async function GET(request: NextRequest) {
     const unread = searchParams.get("unread")
     const hasAttachment = searchParams.get("hasAttachment")
     const searchQuery = searchParams.get("search")
+    const threadId = searchParams.get("thread_id") || searchParams.get("threadId")
     const limit = Math.min(parseInt(searchParams.get("limit") || "50", 10), 200)
 
     const queryParams: Record<string, unknown> = { limit }
     if (unread === "true") queryParams.unread = true
     if (hasAttachment === "true") queryParams.hasAttachment = true
     if (searchQuery) queryParams.searchQueryNative = searchQuery
+    if (threadId) queryParams.threadId = threadId
 
     const response = await nylas.messages.list({
       identifier: grantId,

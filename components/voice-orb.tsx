@@ -6,9 +6,11 @@ import type { AgentStatus } from "@/lib/types"
 interface VoiceOrbProps {
   status: AgentStatus
   onClick: () => void
+  onStop?: () => void
+  isConnected?: boolean
 }
 
-export function VoiceOrb({ status, onClick }: VoiceOrbProps) {
+export function VoiceOrb({ status, onClick, onStop, isConnected }: VoiceOrbProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animationRef = useRef<number>(0)
   const timeRef = useRef(0)
@@ -227,74 +229,102 @@ export function VoiceOrb({ status, onClick }: VoiceOrbProps) {
           : "Processing..."
 
   return (
-    <button
-      onClick={onClick}
-      className="relative flex flex-col items-center gap-6 focus:outline-none group"
-      aria-label={statusLabel}
-    >
-      <div className="relative w-48 h-48 md:w-56 md:h-56">
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full cursor-pointer"
-          style={{ width: "100%", height: "100%" }}
-        />
-        {/* Center icon */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          {status === "idle" && (
-            <svg
-              className="w-10 h-10 text-primary opacity-60 group-hover:opacity-100 transition-opacity"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-              />
-            </svg>
-          )}
-          {status === "listening" && (
-            <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1 bg-primary rounded-full"
-                  style={{
-                    animation: `waveform-bar 0.6s ease-in-out ${i * 0.1}s infinite`,
-                    height: "24px",
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          {status === "processing" && (
-            <svg
-              className="w-8 h-8 text-primary animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
+    <div className="relative flex flex-col items-center gap-6">
+      <button
+        onClick={onClick}
+        className="relative flex flex-col items-center focus:outline-none group"
+        aria-label={statusLabel}
+      >
+        <div className="relative w-48 h-48 md:w-56 md:h-56">
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 w-full h-full cursor-pointer"
+            style={{ width: "100%", height: "100%" }}
+          />
+          {/* Center icon */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {status === "idle" && (
+              <svg
+                className="w-10 h-10 text-primary opacity-60 group-hover:opacity-100 transition-opacity"
+                fill="none"
+                viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth="3"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-          )}
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+                />
+              </svg>
+            )}
+            {status === "listening" && (
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-1 bg-primary rounded-full"
+                    style={{
+                      animation: `waveform-bar 0.6s ease-in-out ${i * 0.1}s infinite`,
+                      height: "24px",
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            {status === "processing" && (
+              <svg
+                className="w-8 h-8 text-primary animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            )}
+          </div>
         </div>
-      </div>
-      <span className="text-sm text-muted-foreground tracking-wide uppercase font-medium">
-        {statusLabel}
-      </span>
-    </button>
+      </button>
+
+      {/* Stop button — appears when connected */}
+      {isConnected && onStop && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onStop()
+          }}
+          className="flex items-center gap-2 px-4 py-2 rounded-full bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 hover:border-destructive/50 text-destructive transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-destructive/40"
+          aria-label="End call"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
+          <span className="text-xs font-medium uppercase tracking-wide">
+            End call
+          </span>
+        </button>
+      )}
+
+      {!isConnected && (
+        <span className="text-sm text-muted-foreground tracking-wide uppercase font-medium">
+          {statusLabel}
+        </span>
+      )}
+    </div>
   )
 }

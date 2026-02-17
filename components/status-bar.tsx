@@ -4,7 +4,6 @@ import type { AgentStatus } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { Mic, Volume2, Loader2, MicOff } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 
 interface StatusBarProps {
   status: AgentStatus
@@ -54,19 +53,9 @@ export function StatusBar({ status, connected, emailsLoading }: StatusBarProps) 
       </Badge>
 
       {/* Right: Voice engine label */}
-      <div className="flex items-center gap-1.5">
-        <span className="text-[11px] text-muted-foreground font-medium font-mono">
-          Pipecat
-        </span>
-        <Separator
-          orientation="vertical"
-          className="h-3 w-px bg-muted-foreground/40"
-          decorative
-        />
-        <span className="text-[11px] text-muted-foreground font-medium font-mono">
-          LiveKit
-        </span>
-      </div>
+      <span className="text-[11px] text-muted-foreground font-medium font-mono">
+        LiveKit
+      </span>
     </div>
   )
 }

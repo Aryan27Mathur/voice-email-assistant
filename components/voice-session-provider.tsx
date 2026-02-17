@@ -7,6 +7,8 @@ import {
   useSessionMessages,
   useVoiceAssistant,
   SessionProvider,
+  RoomAudioRenderer,
+  StartAudio,
 } from "@livekit/components-react"
 import type { AgentStatus } from "@/lib/types"
 import type { ConversationMessage } from "@/lib/types"
@@ -22,6 +24,8 @@ function mapAgentStateToStatus(
     case "speaking":
       return "speaking"
     case "connecting":
+      // Connected to room but agent hasn't joined yet — show processing, not idle
+      return "processing"
     case "disconnected":
     default:
       return "idle"
@@ -65,5 +69,11 @@ interface VoiceSessionWrapperProps {
 
 export function VoiceSessionWrapper({ children }: VoiceSessionWrapperProps) {
   const session = useVoiceSession()
-  return <SessionProvider session={session}>{children}</SessionProvider>
+  return (
+    <SessionProvider session={session}>
+      <RoomAudioRenderer />
+      <StartAudio label="Click to allow audio" />
+      {children}
+    </SessionProvider>
+  )
 }

@@ -18,6 +18,26 @@ export interface Email {
   starred: boolean
   labels: string[]
   attachments: EmailAttachment[]
+  threadId?: string
+}
+
+export interface EmailThreadParticipant {
+  name: string
+  email: string
+}
+
+export interface EmailThread {
+  id: string
+  subject: string
+  snippet: string
+  messageIds: string[]
+  unread: boolean
+  starred: boolean
+  latestMessageReceivedDate?: number
+  latestMessageSentDate?: number
+  participants: EmailThreadParticipant[]
+  hasAttachments: boolean
+  needsReply: boolean
 }
 
 export interface ConversationMessage {

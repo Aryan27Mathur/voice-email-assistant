@@ -29,6 +29,7 @@ export async function GET(
     })
 
     const data = msg.data
+
     const from = data.from?.[0]
 
     const email: Email = {

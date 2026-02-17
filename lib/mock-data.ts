@@ -1,4 +1,4 @@
-import type { Email } from "./types"
+import type { Email, EmailThread } from "./types"
 
 export const mockEmails: Email[] = [
   {
@@ -147,3 +147,18 @@ export const mockEmails: Email[] = [
     ],
   },
 ]
+
+/** Mock threads for demo when Nylas is not connected. Each email becomes a single-message thread. */
+export const mockThreads: EmailThread[] = mockEmails.map((e, i) => ({
+  id: `thread-${e.id}`,
+  subject: e.subject,
+  snippet: e.snippet,
+  messageIds: [e.id],
+  unread: !e.read,
+  starred: e.starred,
+  latestMessageReceivedDate: new Date(e.date).getTime() / 1000,
+  latestMessageSentDate: undefined,
+  participants: [{ name: e.from, email: e.fromEmail }],
+  hasAttachments: e.attachments.length > 0,
+  needsReply: false,
+}))

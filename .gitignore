@@ -12,3 +12,4 @@ venv/
 .env*
 !.env.example
 .DS_Store
+.grants.json
